@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>ViewIt</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: #000;
+            font-family: 'Courier New', monospace;
+        }
+        #terminal {
+            background: #000;
+            color: #00ff00;
+            padding: 20px;
+            border: 2px solid #333;
+            font-size: 8px;
+            line-height: 8px;
+            white-space: pre;
+            overflow: hidden;
+            width: 90vw;
+            height: 70vh;
+        }
+        #upload {
+            margin-bottom: 20px;
+            padding: 10px;
+            background: #111;
+            border: 1px solid #333;
+        }
+        input[type="file"] {
+            background: #222;
+            color: #00ff00;
+            border: 1px solid #333;
+            padding: 5px;
+        }
+        footer {
+            position: fixed;
+            bottom: 10px;
+            right: 10px;
+            color: #666;
+            font-size: 12px;
+        }
+        #github-block {
+            margin-top: 20px;
+            padding: 15px;
+            background: #111;
+            border: 1px solid #333;
+            color: #00ff00;
+            text-align: center;
+        }
+        h1 {
+            color: #00ff00;
+            text-align: center;
+            margin: 0 0 20px 0;
+            font-size: 24px;
+        }
+    </style>
+</head>
+<body>
+    <h1>ViewIt</h1>
+    <div id="upload">
+        <input type="file" id="videoFile" accept="video/*">
+        <span style="color: #00ff00; margin-left: 10px;">Upload a video to convert to ASCII</span>
+    </div>
+    <div id="terminal">Upload a video to start ASCII conversion...</div>
+    <div id="github-block">
+        Ohh! you wanna make changes.<br>
+        Get the source code in <a href="https://github.com/Games-of-Ayaan/ViewIt" style="color: #00ff00; text-decoration: underline;">Github</a>.
+    </div>
+    <footer>A GameDev Ayaan Creation</footer>
+    
+    <script>
+        const terminal = document.getElementById('terminal');
+        const video = document.createElement('video');
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        
+        const ASCII_CHARS = "@%#*+=-:. ";
+        
+        video.loop = true;
+        video.muted = true;
+        
+        document.getElementById('videoFile').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const url = URL.createObjectURL(file);
+                video.src = url;
+                terminal.textContent = 'Loading video...';
+            }
+        });
+        
+        function frameToAscii(imageData, width, height) {
+            let ascii = '';
+            const terminalRect = terminal.getBoundingClientRect();
+            const asciiWidth = Math.floor(terminalRect.width / 6);
+            const asciiHeight = Math.floor(terminalRect.height / 10);
+            
+            for (let y = 0; y < asciiHeight; y++) {
+                for (let x = 0; x < asciiWidth; x++) {
+                    const srcX = Math.floor(x * width / asciiWidth);
+                    const srcY = Math.floor(y * height / asciiHeight);
+                    const i = (srcY * width + srcX) * 4;
+                    
+                    const gray = (imageData.data[i] + imageData.data[i + 1] + imageData.data[i + 2]) / 3;
+                    const charIndex = Math.min(Math.floor(gray * ASCII_CHARS.length / 256), ASCII_CHARS.length - 1);
+                    ascii += ASCII_CHARS[charIndex];
+                }
+                ascii += '\n';
+            }
+            return ascii;
+        }
+        
+        function updateFrame() {
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            ctx.drawImage(video, 0, 0);
+            
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            const asciiFrame = frameToAscii(imageData, canvas.width, canvas.height);
+            terminal.textContent = asciiFrame;
+            
+            requestAnimationFrame(updateFrame);
+        }
+        
+        video.addEventListener('loadeddata', () => {
+            if (video.src) {
+                video.play();
+                updateFrame();
+            }
+        });
+    </script>
+</body>
+</html>
