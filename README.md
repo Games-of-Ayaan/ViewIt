@@ -25,4 +25,6 @@ Convert any video into ASCII art and watch it play in a terminal-style interface
 - Video file in supported format (MP4, WebM, etc.)
 
 ---
+<img width="1024" height="1024" alt="ChatGPT Image Aug 16, 2025, 05_56_27 PM" src="https://github.com/user-attachments/assets/2fb32b4d-5ffd-4c33-99bc-482a34e13ef9" />
+
 **A GameDev Ayaan Creation**
